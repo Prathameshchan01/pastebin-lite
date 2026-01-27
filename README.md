@@ -77,3 +77,4 @@ If `TEST_MODE=1` is set, the request header `x-test-now-ms: <ms since epoch>` is
 This project uses **SQLite** stored in `db/pastes.db` for persistence across requests.
 
 If deploying to a serverless environment, a managed external datastore (Redis/KV/Postgres/etc.) is recommended, since local filesystem persistence may not survive across cold starts or instances.
+Deployed on Vercel
