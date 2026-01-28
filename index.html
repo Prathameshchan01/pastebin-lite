@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pastebin_lite</title>
+
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --primary-hover: #1e40af;
+        --success: #15803d;
+        --error: #b91c1c;
+        --border: #e5e7eb;
+        --muted: #6b7280;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: linear-gradient(180deg, #eef2ff, #2c5a89);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .card {
+        background: var(--card);
+        width: 100%;
+        max-width: 820px;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      }
+
+      h2 {
+        margin: 0 0 6px;
+        font-size: 26px;
+        letter-spacing: -0.3px;
+      }
+
+      p {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        margin-top: 16px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 220px;
+        resize: vertical;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 14px;
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .row > div {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+      }
+
+      button {
+        margin-top: 22px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: none;
+        background: var(--primary);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.05s ease, background 0.2s ease,
+          box-shadow 0.2s ease;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+      }
+
+      button:hover {
+        background: var(--primary-hover);
+      }
+
+      button:active {
+        transform: translateY(1px);
+        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+      }
+
+      .err {
+        color: var(--error);
+        font-weight: 600;
+        margin-top: 14px;
+      }
+
+      .ok {
+        color: var(--success);
+        font-weight: 600;
+        margin-top: 14px;
+      }
+
+      pre {
+        margin-top: 14px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 13px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <h2>Pastebin-Lite</h2>
+      <p>Create a paste and get a shareable URL instantly.</p>
+
+      <label>Content</label>
+      <textarea id="content" placeholder="Write Something"></textarea>
+
+      <div class="row">
+        <div>
+          <label>TTL (seconds)</label>
+          <input id="ttl" type="number" min="1" step="1" placeholder="e.g. 120" />
+        </div>
+        <div>
+          <label>Max Views</label>
+          <input
+            id="views"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="e.g. 8"
+          />
+        </div>
+      </div>
+
+      <button id="create">Create Paste</button>
+
+      <div
+        id="msg"
+        class="err"
+        style="display: none"
+        aria-live="polite"
+      ></div>
+
+      <pre id="out"></pre>
+    </div>
+
+    <script>
+      const out = document.getElementById("out");
+      const msg = document.getElementById("msg");
+
+      document.getElementById("create").addEventListener("click", async () => {
+        out.textContent = "";
+        msg.style.display = "none";
+        msg.className = "";
+
+        const content = document.getElementById("content").value;
+        const ttl = document.getElementById("ttl").value;
+        const views = document.getElementById("views").value;
+
+        const body = { content };
+        if (ttl) body.ttl_seconds = Number(ttl);
+        if (views) body.max_views = Number(views);
+
+        const r = await fetch("/api/pastes", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        const data = await r.json().catch(() => ({
+          error: "Invalid response from server",
+        }));
+
+        if (!r.ok) {
+          msg.textContent = "Error: " + (data.error || "Something went wrong");
+          msg.className = "err";
+        } else {
+          msg.textContent = "Paste created successfully ";
+          msg.className = "ok";
+        }
+
+        msg.style.display = "block";
+        out.textContent = JSON.stringify(data, null, 2);
+      });
+    </script>
+  </body>
+</html>
