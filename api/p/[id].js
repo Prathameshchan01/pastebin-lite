@@ -7,15 +7,20 @@ module.exports = async function handler(req, res) {
     return res.end("Method not allowed");
   }
 
-  const id =
-    req.query?.id ||
-    String(req.url || "")
-      .split("?")[0]
-      .split("/")
-      .filter(Boolean)
-      .pop();
+  // Vercel passes dynamic route params in req.query
+  // For /api/p/[id], the param is available as req.query.id
+  let id = req.query?.id;
+  
+  // Fallback: parse from URL path if query param not available
+  if (!id && req.url) {
+    const parts = req.url.split("?")[0].split("/").filter(Boolean);
+    // Path is /api/p/:id, so id is the last segment
+    id = parts[parts.length - 1];
+  }
 
-  if (!id) return sendHtml(res, 404, "Paste not found");
+  if (!id || typeof id !== "string" || id.trim() === "") {
+    return sendHtml(res, 404, "Paste not found");
+  }
 
   try {
     const paste = await getPaste(id, req);
