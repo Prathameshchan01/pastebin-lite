@@ -35,7 +35,9 @@ Then open (replace with your port if you set `PORT`):
 
 ## Deploy on Vercel
 
-Your repo is already on GitHub. Deploy it on Vercel as follows:
+This repository is structured for Vercel as:
+- **API**: serverless functions under `api/`
+- **UI**: static site under `public/` (served as the project’s Output Directory on Vercel)
 
 1. Go to [vercel.com](https://vercel.com) and sign in with GitHub.
 2. Click **Add New…** → **Project**.
@@ -44,7 +46,11 @@ Your repo is already on GitHub. Deploy it on Vercel as follows:
    - `UPSTASH_REDIS_REST_URL` = your Upstash Redis REST URL  
    - `UPSTASH_REDIS_REST_TOKEN` = your Upstash Redis REST token  
    - `TEST_MODE` = `1` (so the grader can use `x-test-now-ms` for TTL tests)
-5. Click **Deploy**. Vercel will build and deploy; you’ll get a URL like `https://your-project.vercel.app`.
+5. In **Settings → Build and Deployment** set:
+   - **Framework Preset**: `Other`
+   - **Build Command**: (empty)
+   - **Output Directory**: `public` (Override ON)
+6. Click **Deploy**. You’ll get a URL like `https://your-project.vercel.app`.
 
 After deploy:
 
